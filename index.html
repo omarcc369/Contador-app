@@ -1,520 +1,643 @@
 <!doctype html>
 <html lang="es">
+
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Streak (Global)</title>
-  <meta name="description" content="Contador global multi-dispositivo con salas por código." />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Streak (Global)</title>
+    <meta name="description" content="Contador global multi-dispositivo con salas por código." />
 
-  <style>
-    :root{
-      --bg1:#0b1020; --bg2:#0a2a2a;
-      --card: rgba(255,255,255,.08);
-      --stroke: rgba(255,255,255,.18);
-      --text: rgba(255,255,255,.92);
-      --muted: rgba(255,255,255,.65);
-      --danger: rgba(255,80,120,.95);
-      --shadow: 0 18px 50px rgba(0,0,0,.45);
-      --radius: 22px;
-    }
-    *{ box-sizing:border-box; }
-    html,body{ height:100%; }
-    body{
-      margin:0;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
-      color: var(--text);
-      background:
-        radial-gradient(1000px 600px at 10% 10%, rgba(120,255,210,.25), transparent 60%),
-        radial-gradient(900px 600px at 90% 30%, rgba(110,170,255,.22), transparent 60%),
-        radial-gradient(800px 500px at 40% 90%, rgba(255,120,200,.16), transparent 60%),
-        linear-gradient(160deg, var(--bg1), var(--bg2));
-      display:flex; align-items:center; justify-content:center;
-      padding: 24px;
-    }
-    .glass{
-      width: min(980px, 100%);
-      background: linear-gradient(180deg, var(--card), rgba(255,255,255,.05));
-      border: 1px solid var(--stroke);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      position: relative;
-      overflow: hidden;
-    }
-    .glass::before{
-      content:"";
-      position:absolute; inset:-2px;
-      background: radial-gradient(400px 240px at 20% 0%, rgba(255,255,255,.22), transparent 70%),
-                  radial-gradient(520px 300px at 80% 20%, rgba(255,255,255,.16), transparent 70%);
-      pointer-events:none;
-      mix-blend-mode: screen;
-    }
-    header{
-      padding: 22px 22px 0 22px;
-      display:flex; gap: 12px;
-      align-items:baseline; justify-content:space-between;
-      position: relative;
-    }
-    .title{ display:flex; flex-direction:column; gap:6px; }
-    h1{ margin:0; font-size:18px; font-weight:650; }
-    .subtitle{ margin:0; color: var(--muted); font-size: 13px; line-height:1.35; }
+    <style>
+        :root {
+            --bg1: #0b1020;
+            --bg2: #0a2a2a;
+            --card: rgba(255, 255, 255, .08);
+            --stroke: rgba(255, 255, 255, .18);
+            --text: rgba(255, 255, 255, .92);
+            --muted: rgba(255, 255, 255, .65);
+            --danger: rgba(255, 80, 120, .95);
+            --shadow: 0 18px 50px rgba(0, 0, 0, .45);
+            --radius: 22px;
+        }
 
-    .grid{
-      display:grid;
-      grid-template-columns: 1.15fr .85fr;
-      gap: 16px;
-      padding: 16px 22px 22px 22px;
-      position: relative;
-    }
-    @media (max-width: 860px){ .grid{ grid-template-columns: 1fr; } }
+        * {
+            box-sizing: border-box;
+        }
 
-    .panel{
-      border: 1px solid rgba(255,255,255,.14);
-      background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.06));
-      border-radius: 18px;
-      padding: 16px;
-      position: relative;
-      overflow:hidden;
-    }
-    .panel::after{
-      content:"";
-      position:absolute; inset:0;
-      background: radial-gradient(700px 240px at 20% 0%, rgba(120,255,210,.10), transparent 65%),
-                  radial-gradient(700px 240px at 90% 40%, rgba(110,170,255,.10), transparent 65%);
-      pointer-events:none;
-    }
-    .badge{
-      padding: 6px 10px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,.18);
-      background: rgba(255,255,255,.06);
-      color: rgba(255,255,255,.82);
-      font-size: 12px;
-      font-weight: 650;
-      white-space:nowrap;
-    }
+        html,
+        body {
+            height: 100%;
+        }
 
-    .timer{
-      display:grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
-      margin-top: 8px;
-      position: relative;
-      z-index: 1;
-    }
-    .stat{
-      border: 1px solid rgba(255,255,255,.16);
-      background: rgba(0,0,0,.10);
-      border-radius: 16px;
-      padding: 14px 12px;
-      text-align:center;
-    }
-    .stat .label{ color: var(--muted); font-size: 12px; margin-bottom: 10px; }
-    .stat .value{ font-size: 32px; font-weight: 720; letter-spacing: .4px; }
+        body {
+            margin: 0;
+            font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+            color: var(--text);
+            background:
+                radial-gradient(1000px 600px at 10% 10%, rgba(120, 255, 210, .25), transparent 60%),
+                radial-gradient(900px 600px at 90% 30%, rgba(110, 170, 255, .22), transparent 60%),
+                radial-gradient(800px 500px at 40% 90%, rgba(255, 120, 200, .16), transparent 60%),
+                linear-gradient(160deg, var(--bg1), var(--bg2));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
 
-    .big{
-      margin-top: 12px;
-      border: 1px solid rgba(255,255,255,.18);
-      background: rgba(255,255,255,.06);
-      border-radius: 16px;
-      padding: 14px 14px;
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap: 12px;
-      position: relative;
-      z-index: 1;
-    }
-    .mono{
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-      font-size: 16px;
-      letter-spacing: .6px;
-      color: rgba(255,255,255,.86);
-      white-space:nowrap;
-    }
-    .actions{
-      margin-top: 14px;
-      display:flex;
-      gap: 10px;
-      flex-wrap:wrap;
-      position: relative;
-      z-index: 1;
-    }
-    button{
-      appearance:none;
-      border: 1px solid rgba(255,255,255,.18);
-      background: rgba(255,255,255,.08);
-      color: var(--text);
-      padding: 10px 12px;
-      border-radius: 14px;
-      cursor:pointer;
-      font-weight: 620;
-      font-size: 13px;
-      transition: transform .08s ease, background .2s ease, border-color .2s ease;
-      user-select:none;
-    }
-    button:hover{ background: rgba(255,255,255,.12); border-color: rgba(255,255,255,.28); }
-    button:active{ transform: translateY(1px); }
-    .danger{
-      border-color: rgba(255,80,120,.45);
-      background: rgba(255,80,120,.16);
-    }
-    .danger:hover{ background: rgba(255,80,120,.22); border-color: rgba(255,80,120,.65); }
-    .ghost{ background: rgba(0,0,0,.12); }
+        .glass {
+            width: min(980px, 100%);
+            background: linear-gradient(180deg, var(--card), rgba(255, 255, 255, .05));
+            border: 1px solid var(--stroke);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            position: relative;
+            overflow: hidden;
+        }
 
-    .rightHead{
-      display:flex; justify-content:space-between; align-items:center; gap:10px;
-      position:relative; z-index:1;
-    }
-    .rightHead h2{ margin:0; font-size:14px; font-weight:680; }
+        .glass::before {
+            content: "";
+            position: absolute;
+            inset: -2px;
+            background: radial-gradient(400px 240px at 20% 0%, rgba(255, 255, 255, .22), transparent 70%),
+                radial-gradient(520px 300px at 80% 20%, rgba(255, 255, 255, .16), transparent 70%);
+            pointer-events: none;
+            mix-blend-mode: screen;
+        }
 
-    .list{
-      margin-top: 10px;
-      display:flex; flex-direction:column; gap:10px;
-      max-height: 360px; overflow:auto; padding-right:2px;
-      position: relative; z-index: 1;
-    }
-    .item{
-      border: 1px solid rgba(255,255,255,.16);
-      background: rgba(0,0,0,.10);
-      border-radius: 16px;
-      padding: 12px 12px;
-      display:flex; justify-content:space-between; gap:10px; align-items:flex-start;
-    }
-    .item .when{ font-size:12px; color: var(--muted); line-height: 1.35; }
-    .item .dur{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Courier New", monospace;
-      font-size:12px; color: rgba(255,255,255,.86); text-align:right; white-space:nowrap; }
-    .empty{
-      border: 1px dashed rgba(255,255,255,.18);
-      background: rgba(255,255,255,.04);
-      border-radius: 16px;
-      padding: 16px;
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.4;
-      position:relative; z-index:1;
-    }
+        header {
+            padding: 22px 22px 0 22px;
+            display: flex;
+            gap: 12px;
+            align-items: baseline;
+            justify-content: space-between;
+            position: relative;
+        }
 
-    .toast{
-      position: fixed;
-      bottom: 16px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(20,20,26,.72);
-      border: 1px solid rgba(255,255,255,.18);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-      color: rgba(255,255,255,.9);
-      padding: 10px 12px;
-      border-radius: 14px;
-      box-shadow: 0 14px 40px rgba(0,0,0,.35);
-      font-size: 13px;
-      opacity: 0;
-      pointer-events:none;
-      transition: opacity .18s ease, transform .18s ease;
-      z-index: 9999;
-      max-width: min(560px, 90vw);
-      text-align:center;
-    }
-    .toast.show{ opacity: 1; transform: translateX(-50%) translateY(-4px); }
+        .title {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
 
-    input{
-      width: 160px;
-      border: 1px solid rgba(255,255,255,.18);
-      background: rgba(0,0,0,.12);
-      color: var(--text);
-      padding: 9px 10px;
-      border-radius: 12px;
-      outline:none;
-      font-weight:650;
-      letter-spacing:.3px;
-      text-transform: uppercase;
-    }
-    input::placeholder{ color: rgba(255,255,255,.45); }
-    .topRow{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; justify-content:flex-end; }
-    .link{ color: rgba(170,220,255,.95); text-decoration:none; }
-    .link:hover{ text-decoration:underline; }
-  </style>
+        h1 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 650;
+        }
+
+        .subtitle {
+            margin: 0;
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.35;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1.15fr .85fr;
+            gap: 16px;
+            padding: 16px 22px 22px 22px;
+            position: relative;
+        }
+
+        @media (max-width: 860px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .panel {
+            border: 1px solid rgba(255, 255, 255, .14);
+            background: linear-gradient(180deg, rgba(255, 255, 255, .10), rgba(255, 255, 255, .06));
+            border-radius: 18px;
+            padding: 16px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .panel::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(700px 240px at 20% 0%, rgba(120, 255, 210, .10), transparent 65%),
+                radial-gradient(700px 240px at 90% 40%, rgba(110, 170, 255, .10), transparent 65%);
+            pointer-events: none;
+        }
+
+        .badge {
+            padding: 6px 10px;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, .18);
+            background: rgba(255, 255, 255, .06);
+            color: rgba(255, 255, 255, .82);
+            font-size: 12px;
+            font-weight: 650;
+            white-space: nowrap;
+        }
+
+        .timer {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-top: 8px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .stat {
+            border: 1px solid rgba(255, 255, 255, .16);
+            background: rgba(0, 0, 0, .10);
+            border-radius: 16px;
+            padding: 14px 12px;
+            text-align: center;
+        }
+
+        .stat .label {
+            color: var(--muted);
+            font-size: 12px;
+            margin-bottom: 10px;
+        }
+
+        .stat .value {
+            font-size: 32px;
+            font-weight: 720;
+            letter-spacing: .4px;
+        }
+
+        .big {
+            margin-top: 12px;
+            border: 1px solid rgba(255, 255, 255, .18);
+            background: rgba(255, 255, 255, .06);
+            border-radius: 16px;
+            padding: 14px 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .mono {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            font-size: 16px;
+            letter-spacing: .6px;
+            color: rgba(255, 255, 255, .86);
+            white-space: nowrap;
+        }
+
+        .actions {
+            margin-top: 14px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            position: relative;
+            z-index: 1;
+        }
+
+        button {
+            appearance: none;
+            border: 1px solid rgba(255, 255, 255, .18);
+            background: rgba(255, 255, 255, .08);
+            color: var(--text);
+            padding: 10px 12px;
+            border-radius: 14px;
+            cursor: pointer;
+            font-weight: 620;
+            font-size: 13px;
+            transition: transform .08s ease, background .2s ease, border-color .2s ease;
+            user-select: none;
+        }
+
+        button:hover {
+            background: rgba(255, 255, 255, .12);
+            border-color: rgba(255, 255, 255, .28);
+        }
+
+        button:active {
+            transform: translateY(1px);
+        }
+
+        .danger {
+            border-color: rgba(255, 80, 120, .45);
+            background: rgba(255, 80, 120, .16);
+        }
+
+        .danger:hover {
+            background: rgba(255, 80, 120, .22);
+            border-color: rgba(255, 80, 120, .65);
+        }
+
+        .ghost {
+            background: rgba(0, 0, 0, .12);
+        }
+
+        .rightHead {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .rightHead h2 {
+            margin: 0;
+            font-size: 14px;
+            font-weight: 680;
+        }
+
+        .list {
+            margin-top: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 360px;
+            overflow: auto;
+            padding-right: 2px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .item {
+            border: 1px solid rgba(255, 255, 255, .16);
+            background: rgba(0, 0, 0, .10);
+            border-radius: 16px;
+            padding: 12px 12px;
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            align-items: flex-start;
+        }
+
+        .item .when {
+            font-size: 12px;
+            color: var(--muted);
+            line-height: 1.35;
+        }
+
+        .item .dur {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Courier New", monospace;
+            font-size: 12px;
+            color: rgba(255, 255, 255, .86);
+            text-align: right;
+            white-space: nowrap;
+        }
+
+        .empty {
+            border: 1px dashed rgba(255, 255, 255, .18);
+            background: rgba(255, 255, 255, .04);
+            border-radius: 16px;
+            padding: 16px;
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.4;
+            position: relative;
+            z-index: 1;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 16px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(20, 20, 26, .72);
+            border: 1px solid rgba(255, 255, 255, .18);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            color: rgba(255, 255, 255, .9);
+            padding: 10px 12px;
+            border-radius: 14px;
+            box-shadow: 0 14px 40px rgba(0, 0, 0, .35);
+            font-size: 13px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .18s ease, transform .18s ease;
+            z-index: 9999;
+            max-width: min(560px, 90vw);
+            text-align: center;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(-4px);
+        }
+
+        input {
+            width: 160px;
+            border: 1px solid rgba(255, 255, 255, .18);
+            background: rgba(0, 0, 0, .12);
+            color: var(--text);
+            padding: 9px 10px;
+            border-radius: 12px;
+            outline: none;
+            font-weight: 650;
+            letter-spacing: .3px;
+            text-transform: uppercase;
+        }
+
+        input::placeholder {
+            color: rgba(255, 255, 255, .45);
+        }
+
+        .topRow {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+        .link {
+            color: rgba(170, 220, 255, .95);
+            text-decoration: none;
+        }
+
+        .link:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
 
 <body>
-  <main class="glass" role="application" aria-label="Contador global de racha">
-    <header>
-      <div class="title">
-        <h1>Streak (Global)</h1>
-        <p class="subtitle">Sala por código. Todos ven el mismo reloj y los reinicios son globales.</p>
-      </div>
+    <main class="glass" role="application" aria-label="Contador global de racha">
+        <header>
+            <div class="title">
+                <h1>Streak (Global)</h1>
+                <p class="subtitle">Sala por código. Todos ven el mismo reloj y los reinicios son globales.</p>
+            </div>
 
-      <div class="topRow">
-        <span class="badge" id="roomBadge">Room: —</span>
-        <span class="badge" id="sinceLabel">Desde: —</span>
-      </div>
-    </header>
+            <div class="topRow">
+                <span class="badge" id="roomBadge">Room: —</span>
+                <span class="badge" id="sinceLabel">Desde: —</span>
+            </div>
+        </header>
 
-    <section class="grid">
-      <section class="panel" aria-label="Contador">
-        <div style="position:relative; z-index:1; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-          <span class="subtitle" style="margin:0;">Código:</span>
-          <input id="roomInput" placeholder="ABCD-1234" maxlength="12" />
-          <button class="ghost" id="joinBtn">Entrar</button>
-          <a class="link subtitle" id="shareLink" href="#" style="margin-left:auto;">Copiar link</a>
-        </div>
+        <section class="grid">
+            <section class="panel" aria-label="Contador">
+                <div style="position:relative; z-index:1; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+                    <span class="subtitle" style="margin:0;">Código:</span>
+                    <input id="roomInput" placeholder="ABCD-1234" maxlength="12" />
+                    <button class="ghost" id="joinBtn">Entrar</button>
+                    <a class="link subtitle" id="shareLink" href="#" style="margin-left:auto;">Copiar link</a>
+                </div>
 
-        <div class="timer" aria-live="polite">
-          <div class="stat">
-            <div class="label">Días</div>
-            <div class="value" id="days">0</div>
-          </div>
-          <div class="stat">
-            <div class="label">Minutos</div>
-            <div class="value" id="minutes">0</div>
-          </div>
-          <div class="stat">
-            <div class="label">Segundos</div>
-            <div class="value" id="seconds">0</div>
-          </div>
-        </div>
+                <div class="timer" aria-live="polite">
+                    <div class="stat">
+                        <div class="label">Días</div>
+                        <div class="value" id="days">0</div>
+                    </div>
+                    <div class="stat">
+                        <div class="label">Minutos</div>
+                        <div class="value" id="minutes">0</div>
+                    </div>
+                    <div class="stat">
+                        <div class="label">Segundos</div>
+                        <div class="value" id="seconds">0</div>
+                    </div>
+                </div>
 
-        <div class="big">
-          <div>
-            <div class="mono" id="clock">00:00:00</div>
-            <small class="subtitle" id="total" style="margin:0;">Total: 0 segundos</small>
-          </div>
-          <div class="badge" id="best">Mejor: —</div>
-        </div>
+                <div class="big">
+                    <div>
+                        <div class="mono" id="clock">00:00:00</div>
+                        <small class="subtitle" id="total" style="margin:0;">Total: 0 segundos</small>
+                    </div>
+                    <div class="badge" id="best">Mejor: —</div>
+                </div>
 
-        <div class="actions">
-          <button class="danger" id="resetBtn">Reiniciar (global)</button>
-          <button class="ghost" id="refreshBtn">Refrescar</button>
-        </div>
+                <div class="actions">
+                    <button class="danger" id="resetBtn">Reiniciar (global)</button>
+                    <button class="ghost" id="refreshBtn">Refrescar</button>
+                </div>
 
-        <p class="subtitle" style="margin-top:12px; position:relative; z-index:1;">
-          Nota: cualquiera con el código/link puede reiniciar esa sala.
-        </p>
-      </section>
+                <p class="subtitle" style="margin-top:12px; position:relative; z-index:1;">
+                    Nota: cualquiera con el código/link puede reiniciar esa sala.
+                </p>
+            </section>
 
-      <aside class="panel" aria-label="Historial global">
-        <div class="rightHead">
-          <h2>Historial (global)</h2>
-          <div class="badge" id="countBadge">0</div>
-        </div>
+            <aside class="panel" aria-label="Historial global">
+                <div class="rightHead">
+                    <h2>Historial (global)</h2>
+                    <div class="badge" id="countBadge">0</div>
+                </div>
 
-        <div class="list" id="list"></div>
-        <div class="empty" id="empty" style="display:none;">
-          Aún no hay recídas registradas en esta sala.
-        </div>
-      </aside>
-    </section>
-  </main>
+                <div class="list" id="list"></div>
+                <div class="empty" id="empty" style="display:none;">
+                    Aún no hay recídas registradas en esta sala.
+                </div>
+            </aside>
+        </section>
+    </main>
 
-  <div class="toast" id="toast"></div>
+    <div class="toast" id="toast"></div>
 
-  <script type="module">
-    import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+    <script type="module">
+        import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-    // ======== Pega aquí tus credenciales ========
-    const SUPABASE_URL = "https://lwqammjjthfdjulnitnx.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx3cWFtbWpqdGhmZGp1bG5pdG54Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk1Njc1MTcsImV4cCI6MjA4NTE0MzUxN30.-CddiZuzRRBZlYbxtJuvP3J9s1NwudNqoVhGL8Wp8us";
-    // ===========================================
+        // ======== Pega aquí tus credenciales ========
+        const SUPABASE_URL = "https://lwqammjjthfdjulnitnx.supabase.co";
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx3cWFtbWpqdGhmZGp1bG5pdG54Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk1Njc1MTcsImV4cCI6MjA4NTE0MzUxN30.-CddiZuzRRBZlYbxtJuvP3J9s1NwudNqoVhGL8Wp8us";
+        // ===========================================
 
-    if (!SUPABASE_URL.startsWith("http")) {
-      alert("Pega tus credenciales de Supabase en el index.html (SUPABASE_URL y SUPABASE_ANON_KEY).");
-    }
+        if (!SUPABASE_URL.startsWith("http")) {
+            alert("Pega tus credenciales de Supabase en el index.html (SUPABASE_URL y SUPABASE_ANON_KEY).");
+        }
 
-    const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    // --- UI ---
-    const elDays = document.getElementById("days");
-    const elMinutes = document.getElementById("minutes");
-    const elSeconds = document.getElementById("seconds");
-    const elClock = document.getElementById("clock");
-    const elTotal = document.getElementById("total");
-    const elSince = document.getElementById("sinceLabel");
-    const elRoom = document.getElementById("roomBadge");
-    const elBest = document.getElementById("best");
-    const elCount = document.getElementById("countBadge");
-    const elList = document.getElementById("list");
-    const elEmpty = document.getElementById("empty");
-    const toast = document.getElementById("toast");
+        // --- UI ---
+        const elDays = document.getElementById("days");
+        const elMinutes = document.getElementById("minutes");
+        const elSeconds = document.getElementById("seconds");
+        const elClock = document.getElementById("clock");
+        const elTotal = document.getElementById("total");
+        const elSince = document.getElementById("sinceLabel");
+        const elRoom = document.getElementById("roomBadge");
+        const elBest = document.getElementById("best");
+        const elCount = document.getElementById("countBadge");
+        const elList = document.getElementById("list");
+        const elEmpty = document.getElementById("empty");
+        const toast = document.getElementById("toast");
 
-    const roomInput = document.getElementById("roomInput");
-    const joinBtn = document.getElementById("joinBtn");
-    const resetBtn = document.getElementById("resetBtn");
-    const refreshBtn = document.getElementById("refreshBtn");
-    const shareLink = document.getElementById("shareLink");
+        const roomInput = document.getElementById("roomInput");
+        const joinBtn = document.getElementById("joinBtn");
+        const resetBtn = document.getElementById("resetBtn");
+        const refreshBtn = document.getElementById("refreshBtn");
+        const shareLink = document.getElementById("shareLink");
 
-    // --- State ---
-    let roomCode = null;
-    let roomId = null;
-    let startMs = null;          // fuente de verdad del servidor (rooms.start_ms)
-    let lastServerStartMs = null;
-    let pollHandle = null;
+        // --- State ---
+        let roomCode = null;
+        let roomId = null;
+        let startMs = null;          // fuente de verdad del servidor (rooms.start_ms)
+        let lastServerStartMs = null;
+        let pollHandle = null;
 
-    // --- Helpers ---
-    const now = () => Date.now();
+        // --- Helpers ---
+        const now = () => Date.now();
 
-    function showToast(msg){
-      toast.textContent = msg;
-      toast.classList.add("show");
-      setTimeout(() => toast.classList.remove("show"), 1800);
-    }
+        function showToast(msg) {
+            toast.textContent = msg;
+            toast.classList.add("show");
+            setTimeout(() => toast.classList.remove("show"), 1800);
+        }
 
-    function normalizeRoomCode(v){
-      v = (v || "").trim().toUpperCase();
-      // permite ABCD-1234 (4 letras, guion, 4 alfanum) pero no forzamos demasiado
-      v = v.replace(/[^A-Z0-9-]/g, "");
-      return v.slice(0, 12);
-    }
+        function normalizeRoomCode(v) {
+            v = (v || "").trim().toUpperCase();
+            // permite ABCD-1234 (4 letras, guion, 4 alfanum) pero no forzamos demasiado
+            v = v.replace(/[^A-Z0-9-]/g, "");
+            return v.slice(0, 12);
+        }
 
-    function randomRoomCode(){
-      const letters = "ABCDEFGHJKLMNPQRSTUVWXYZ"; // sin I/O para evitar confusión
-      const digits = "23456789"; // sin 0/1
-      const pick = (s, n) => Array.from({length:n}, () => s[Math.floor(Math.random()*s.length)]).join("");
-      return `${pick(letters,4)}-${pick(digits,4)}`;
-    }
+        function randomRoomCode() {
+            const letters = "ABCDEFGHJKLMNPQRSTUVWXYZ"; // sin I/O para evitar confusión
+            const digits = "23456789"; // sin 0/1
+            const pick = (s, n) => Array.from({ length: n }, () => s[Math.floor(Math.random() * s.length)]).join("");
+            return `${pick(letters, 4)}-${pick(digits, 4)}`;
+        }
 
-    function formatSince(ts){
-      try{
-        return new Intl.DateTimeFormat("es-MX", { dateStyle:"medium", timeStyle:"short" }).format(new Date(ts));
-      } catch {
-        return new Date(ts).toLocaleString();
-      }
-    }
+        function formatSince(ts) {
+            try {
+                return new Intl.DateTimeFormat("es-MX", { dateStyle: "medium", timeStyle: "short" }).format(new Date(ts));
+            } catch {
+                return new Date(ts).toLocaleString();
+            }
+        }
 
-    function formatClock(ms){
-      const totalSec = Math.max(0, Math.floor(ms/1000));
-      const hh = Math.floor(totalSec/3600);
-      const mm = Math.floor((totalSec%3600)/60);
-      const ss = totalSec%60;
-      const pad = (n) => String(n).padStart(2, "0");
-      return `${pad(hh)}:${pad(mm)}:${pad(ss)}`;
-    }
+        function formatClock(ms) {
+            const totalSec = Math.max(0, Math.floor(ms / 1000));
+            const hh = Math.floor(totalSec / 3600);
+            const mm = Math.floor((totalSec % 3600) / 60);
+            const ss = totalSec % 60;
+            const pad = (n) => String(n).padStart(2, "0");
+            return `${pad(hh)}:${pad(mm)}:${pad(ss)}`;
+        }
 
-    function compactDuration(ms){
-      const s = Math.max(0, Math.floor(ms/1000));
-      const d = Math.floor(s / 86400);
-      const h = Math.floor((s % 86400) / 3600);
-      const m = Math.floor((s % 3600) / 60);
-      const sec = s % 60;
-      const parts = [];
-      if (d) parts.push(`${d}d`);
-      if (h || d) parts.push(`${h}h`);
-      if (m || h || d) parts.push(`${m}m`);
-      parts.push(`${sec}s`);
-      return parts.join(" ");
-    }
+        function compactDuration(ms) {
+            const s = Math.max(0, Math.floor(ms / 1000));
+            const d = Math.floor(s / 86400);
+            const h = Math.floor((s % 86400) / 3600);
+            const m = Math.floor((s % 3600) / 60);
+            const sec = s % 60;
+            const parts = [];
+            if (d) parts.push(`${d}d`);
+            if (h || d) parts.push(`${h}h`);
+            if (m || h || d) parts.push(`${m}m`);
+            parts.push(`${sec}s`);
+            return parts.join(" ");
+        }
 
-    function setRoomUI(code){
-      elRoom.textContent = `Room: ${code}`;
-      roomInput.value = code;
-      const url = new URL(location.href);
-      url.searchParams.set("room", code);
-      shareLink.href = url.toString();
-    }
+        function setRoomUI(code) {
+            elRoom.textContent = `Room: ${code}`;
+            roomInput.value = code;
+            const url = new URL(location.href);
+            url.searchParams.set("room", code);
+            shareLink.href = url.toString();
+        }
 
-    async function copyShareLink(){
-      try{
-        await navigator.clipboard.writeText(shareLink.href);
-        showToast("Link copiado ✅");
-      } catch {
-        showToast("No se pudo copiar (copia manual).");
-      }
-    }
+        async function copyShareLink() {
+            try {
+                await navigator.clipboard.writeText(shareLink.href);
+                showToast("Link copiado ✅");
+            } catch {
+                showToast("No se pudo copiar (copia manual).");
+            }
+        }
 
-    // --- Supabase ops ---
-    async function ensureRoom(code){
-      // llama función SQL ensure_room
-      const { data, error } = await sb.rpc("ensure_room", { p_room_code: code });
-      if (error) throw error;
-      return data; // row de rooms
-    }
+        // --- Supabase ops ---
+        async function ensureRoom(code) {
+            // llama función SQL ensure_room
+            const { data, error } = await sb.rpc("ensure_room", { p_room_code: code });
+            if (error) throw error;
+            return data; // row de rooms
+        }
 
-    async function fetchRoom(code){
-      const { data, error } = await sb
-        .from("rooms")
-        .select("id, room_code, start_ms, updated_at")
-        .eq("room_code", code)
-        .maybeSingle();
-      if (error) throw error;
-      return data;
-    }
+        async function fetchRoom(code) {
+            const { data, error } = await sb
+                .from("rooms")
+                .select("id, room_code, start_ms, updated_at")
+                .eq("room_code", code)
+                .maybeSingle();
+            if (error) throw error;
+            return data;
+        }
 
-    async function fetchRelapses(rid){
-      const { data, error } = await sb
-        .from("relapses")
-        .select("at_ms, duration_ms")
-        .eq("room_id", rid)
-        .order("at_ms", { ascending: false })
-        .limit(100);
-      if (error) throw error;
-      return data || [];
-    }
+        async function fetchRelapses(rid) {
+            const { data, error } = await sb
+                .from("relapses")
+                .select("at_ms, duration_ms")
+                .eq("room_id", rid)
+                .order("at_ms", { ascending: false })
+                .limit(100);
+            if (error) throw error;
+            return data || [];
+        }
 
-    async function resetGlobal(){
-      if (!roomId || !Number.isFinite(startMs)) return;
+        async function resetGlobal() {
+            if (!roomId || !Number.isFinite(startMs)) return;
 
-      const durationMs = now() - startMs;
-      if (durationMs < 2000){
-        showToast("Reinicio bloqueado (<2s).");
-        return;
-      }
+            const durationMs = now() - startMs;
+            if (durationMs < 2000) {
+                showToast("Reinicio bloqueado (<2s).");
+                return;
+            }
 
-      const newStart = now();
+            const newStart = now();
 
-      // 1) insert relapse
-      const { error: e1 } = await sb.from("relapses").insert({
-        room_id: roomId,
-        at_ms: newStart,
-        duration_ms: durationMs
-      });
-      if (e1) throw e1;
+            // 1) insert relapse
+            const { error: e1 } = await sb.from("relapses").insert({
+                room_id: roomId,
+                at_ms: newStart,
+                duration_ms: durationMs
+            });
+            if (e1) throw e1;
 
-      // 2) update room start_ms
-      const { error: e2 } = await sb
-        .from("rooms")
-        .update({ start_ms: newStart, updated_at: new Date().toISOString() })
-        .eq("id", roomId);
-      if (e2) throw e2;
+            // 2) update room start_ms
+            const { error: e2 } = await sb
+                .from("rooms")
+                .update({ start_ms: newStart, updated_at: new Date().toISOString() })
+                .eq("id", roomId);
+            if (e2) throw e2;
 
-      // local state updates fast (los demás lo verán por polling)
-      startMs = newStart;
-      lastServerStartMs = newStart;
+            // local state updates fast (los demás lo verán por polling)
+            startMs = newStart;
+            lastServerStartMs = newStart;
 
-      showToast(`Reiniciado. Anterior: ${compactDuration(durationMs)}`);
-      await refreshAll();
-    }
+            showToast(`Reiniciado. Anterior: ${compactDuration(durationMs)}`);
+            await refreshAll();
+        }
 
-    // --- Rendering ---
-    function tick(){
-      if (!Number.isFinite(startMs)) return;
-      const elapsedMs = now() - startMs;
+        // --- Rendering ---
+        function tick() {
+            if (!Number.isFinite(startMs)) return;
+            const elapsedMs = now() - startMs;
 
-      const totalSec = Math.max(0, Math.floor(elapsedMs/1000));
-      const days = Math.floor(totalSec / 86400);
-      const minutes = Math.floor(totalSec / 60);
-      const seconds = totalSec;
+            const totalSec = Math.max(0, Math.floor(elapsedMs / 1000));
+            const days = Math.floor(totalSec / 86400);
+            const minutes = Math.floor(totalSec / 60);
+            const seconds = totalSec;
 
-      elDays.textContent = String(days);
-      elMinutes.textContent = String(minutes);
-      elSeconds.textContent = String(seconds);
-      elClock.textContent = formatClock(elapsedMs);
-      elTotal.textContent = `Total: ${seconds} segundos`;
+            elDays.textContent = String(days);
+            elMinutes.textContent = String(minutes);
+            elSeconds.textContent = String(seconds);
+            elClock.textContent = formatClock(elapsedMs);
+            elTotal.textContent = `Total: ${seconds} segundos`;
 
-      elSince.textContent = `Desde: ${formatSince(startMs)}`;
-    }
+            elSince.textContent = `Desde: ${formatSince(startMs)}`;
+        }
 
-    function renderRelapses(relapses){
-      elCount.textContent = String(relapses.length);
-      if (!relapses.length){
-        elList.innerHTML = "";
-        elEmpty.style.display = "block";
-      } else {
-        elEmpty.style.display = "none";
-        elList.innerHTML = relapses.map(r => {
-          const at = formatSince(r.at_ms);
-          const dur = compactDuration(r.duration_ms);
-          return `
+        function renderRelapses(relapses) {
+            elCount.textContent = String(relapses.length);
+            if (!relapses.length) {
+                elList.innerHTML = "";
+                elEmpty.style.display = "block";
+            } else {
+                elEmpty.style.display = "none";
+                elList.innerHTML = relapses.map(r => {
+                    const at = formatSince(r.at_ms);
+                    const dur = compactDuration(r.duration_ms);
+                    return `
             <div class="item">
               <div class="when">
                 <div><strong>Recída</strong></div>
@@ -523,113 +646,125 @@
               <div class="dur" title="Duración anterior">${dur}</div>
             </div>
           `;
-        }).join("");
-      }
-      // best: max(duration_ms, current)
-      const bestStored = relapses.reduce((m, r) => Math.max(m, Number(r.duration_ms)||0), 0);
-      const current = Number.isFinite(startMs) ? (now() - startMs) : 0;
-      elBest.textContent = `Mejor: ${compactDuration(Math.max(bestStored, current))}`;
-    }
-
-    async function refreshAll(){
-      // 1) fetch room start from server
-      const room = await fetchRoom(roomCode);
-      if (!room){
-        // si por alguna razón no existe, créala
-        const created = await ensureRoom(roomCode);
-        roomId = created.id;
-        startMs = Number(created.start_ms);
-        lastServerStartMs = startMs;
-      } else {
-        roomId = room.id;
-        const serverStart = Number(room.start_ms);
-        if (Number.isFinite(serverStart)){
-          // detecta cambios por reinicio en otro dispositivo
-          if (lastServerStartMs !== null && serverStart !== lastServerStartMs){
-            startMs = serverStart;
-            showToast("Se reinició desde otro dispositivo.");
-          } else {
-            startMs = serverStart;
-          }
-          lastServerStartMs = serverStart;
+                }).join("");
+            }
+            // best: max(duration_ms, current)
+            const bestStored = relapses.reduce((m, r) => Math.max(m, Number(r.duration_ms) || 0), 0);
+            const current = Number.isFinite(startMs) ? (now() - startMs) : 0;
+            elBest.textContent = `Mejor: ${compactDuration(Math.max(bestStored, current))}`;
         }
-      }
 
-      // 2) fetch relapses and render
-      const relapses = await fetchRelapses(roomId);
-      renderRelapses(relapses);
-    }
+        async function refreshAll() {
+            // 1) fetch room start from server
+            const room = await fetchRoom(roomCode);
+            if (!room) {
+                // si por alguna razón no existe, créala
+                const created = await ensureRoom(roomCode);
+                roomId = created.id;
+                startMs = Number(created.start_ms);
+                lastServerStartMs = startMs;
+            } else {
+                roomId = room.id;
+                const serverStart = Number(room.start_ms);
+                if (Number.isFinite(serverStart)) {
+                    // detecta cambios por reinicio en otro dispositivo
+                    if (lastServerStartMs !== null && serverStart !== lastServerStartMs) {
+                        startMs = serverStart;
+                        showToast("Se reinició desde otro dispositivo.");
+                    } else {
+                        startMs = serverStart;
+                    }
+                    lastServerStartMs = serverStart;
+                }
+            }
 
-    function startPolling(){
-      stopPolling();
-      pollHandle = setInterval(async () => {
-        try { await refreshAll(); }
-        catch (e) { /* silencioso */ }
-      }, 2000);
-    }
-    function stopPolling(){
-      if (pollHandle) clearInterval(pollHandle);
-      pollHandle = null;
-    }
+            // 2) fetch relapses and render
+            const relapses = await fetchRelapses(roomId);
+            renderRelapses(relapses);
+        }
 
-    async function joinRoom(code){
-      roomCode = normalizeRoomCode(code);
-      if (!roomCode){
-        showToast("Pon un código válido.");
-        return;
-      }
-      setRoomUI(roomCode);
+        function startPolling() {
+            stopPolling();
+            pollHandle = setInterval(async () => {
+                try { await refreshAll(); }
+                catch (e) { /* silencioso */ }
+            }, 2000);
+        }
+        function stopPolling() {
+            if (pollHandle) clearInterval(pollHandle);
+            pollHandle = null;
+        }
 
-      try{
-        const r = await ensureRoom(roomCode);
-        roomId = r.id;
-        startMs = Number(r.start_ms);
-        lastServerStartMs = startMs;
+        async function joinRoom(code) {
+            roomCode = normalizeRoomCode(code);
+            if (!roomCode) {
+                showToast("Pon un código válido.");
+                return;
+            }
+            setRoomUI(roomCode);
 
-        await refreshAll();
-        startPolling();
+            try {
+                const r = await ensureRoom(roomCode);
+                roomId = r.id;
+                startMs = Number(r.start_ms);
+                lastServerStartMs = startMs;
 
-        const url = new URL(location.href);
-        url.searchParams.set("room", roomCode);
-        history.replaceState(null, "", url.toString());
+                await refreshAll();
+                startPolling();
 
-        showToast("Conectado ✅");
-      } catch (e){
-        console.error(e);
-        showToast("Error conectando a Supabase. Revisa credenciales/RLS.");
-      }
-    }
+                const url = new URL(location.href);
+                url.searchParams.set("room", roomCode);
+                history.replaceState(null, "", url.toString());
 
-    // --- Events ---
-    joinBtn.addEventListener("click", () => joinRoom(roomInput.value));
-    roomInput.addEventListener("input", () => roomInput.value = normalizeRoomCode(roomInput.value));
-    roomInput.addEventListener("keydown", (e) => { if (e.key === "Enter") joinRoom(roomInput.value); });
+                showToast("Conectado ✅");
+            } catch (e) {
+                console.error(e);
+                showToast("Error conectando a Supabase. Revisa credenciales/RLS.");
+            }
+        }
 
-    resetBtn.addEventListener("click", async () => {
-      try{ await resetGlobal(); }
-      catch(e){ console.error(e); showToast("No se pudo reiniciar."); }
-    });
+        // --- Events ---
+        joinBtn.addEventListener("click", () => joinRoom(roomInput.value));
+        roomInput.addEventListener("input", () => roomInput.value = normalizeRoomCode(roomInput.value));
+        roomInput.addEventListener("keydown", (e) => { if (e.key === "Enter") joinRoom(roomInput.value); });
 
-    refreshBtn.addEventListener("click", async () => {
-      try{ await refreshAll(); showToast("Actualizado."); }
-      catch(e){ console.error(e); showToast("Error al refrescar."); }
-    });
+        resetBtn.addEventListener("click", async () => {
+            try { await resetGlobal(); }
+            catch (e) { console.error(e); showToast("No se pudo reiniciar."); }
+        });
 
-    shareLink.addEventListener("click", async (e) => {
-      e.preventDefault();
-      await copyShareLink();
-    });
+        refreshBtn.addEventListener("click", async () => {
+            try { await refreshAll(); showToast("Actualizado."); }
+            catch (e) { console.error(e); showToast("Error al refrescar."); }
+        });
 
-    // --- Boot ---
-    // Si no hay room en URL, crea una random y entra
-    const params = new URLSearchParams(location.search);
-    const urlRoom = normalizeRoomCode(params.get("room") || "");
-    const initial = urlRoom || randomRoomCode();
-    await joinRoom(initial);
+        shareLink.addEventListener("click", async (e) => {
+            e.preventDefault();
+            await copyShareLink();
+        });
 
-    // UI tick local cada segundo (sin tocar servidor)
-    setInterval(tick, 1000);
-    tick();
-  </script>
+        // --- Boot ---
+        // Si no hay room en URL, NO crear sala automáticamente.
+        // Pedimos que el usuario pegue un código o cree una sala manualmente.
+        const params = new URLSearchParams(location.search);
+        const urlRoom = normalizeRoomCode(params.get("room") || "");
+
+        if (urlRoom) {
+            await joinRoom(urlRoom);
+        } else {
+            // UI: prepara un código sugerido, pero NO lo crea hasta que den "Entrar"
+            const suggested = randomRoomCode();
+            roomInput.value = suggested;
+            elRoom.textContent = "Room: —";
+            elSince.textContent = "Desde: —";
+            showToast("Pega un código o pulsa Entrar para crear una sala.");
+        }
+
+
+        // UI tick local cada segundo (sin tocar servidor)
+        setInterval(tick, 1000);
+        tick();
+    </script>
 </body>
+
 </html>
