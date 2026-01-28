@@ -20,14 +20,8 @@
             --radius: 22px;
         }
 
-        * {
-            box-sizing: border-box;
-        }
-
-        html,
-        body {
-            height: 100%;
-        }
+        * { box-sizing: border-box; }
+        html, body { height: 100%; }
 
         body {
             margin: 0;
@@ -103,9 +97,7 @@
         }
 
         @media (max-width: 860px) {
-            .grid {
-                grid-template-columns: 1fr;
-            }
+            .grid { grid-template-columns: 1fr; }
         }
 
         .panel {
@@ -139,11 +131,15 @@
 
         .timer {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(4, 1fr);
             gap: 12px;
             margin-top: 8px;
             position: relative;
             z-index: 1;
+        }
+
+        @media (max-width: 520px) {
+            .timer { grid-template-columns: repeat(2, 1fr); }
         }
 
         .stat {
@@ -216,9 +212,7 @@
             border-color: rgba(255, 255, 255, .28);
         }
 
-        button:active {
-            transform: translateY(1px);
-        }
+        button:active { transform: translateY(1px); }
 
         .danger {
             border-color: rgba(255, 80, 120, .45);
@@ -230,9 +224,7 @@
             border-color: rgba(255, 80, 120, .65);
         }
 
-        .ghost {
-            background: rgba(0, 0, 0, .12);
-        }
+        .ghost { background: rgba(0, 0, 0, .12); }
 
         .rightHead {
             display: flex;
@@ -338,9 +330,7 @@
             text-transform: uppercase;
         }
 
-        input::placeholder {
-            color: rgba(255, 255, 255, .45);
-        }
+        input::placeholder { color: rgba(255, 255, 255, .45); }
 
         .topRow {
             display: flex;
@@ -355,9 +345,7 @@
             text-decoration: none;
         }
 
-        .link:hover {
-            text-decoration: underline;
-        }
+        .link:hover { text-decoration: underline; }
     </style>
 </head>
 
@@ -390,19 +378,23 @@
                         <div class="value" id="days">0</div>
                     </div>
                     <div class="stat">
+                        <div class="label">Horas</div>
+                        <div class="value" id="hours">0</div>
+                    </div>
+                    <div class="stat">
                         <div class="label">Minutos</div>
-                        <div class="value" id="minutes">0</div>
+                        <div class="value" id="minutes">00</div>
                     </div>
                     <div class="stat">
                         <div class="label">Segundos</div>
-                        <div class="value" id="seconds">0</div>
+                        <div class="value" id="seconds">00</div>
                     </div>
                 </div>
 
                 <div class="big">
                     <div>
                         <div class="mono" id="clock">00:00:00</div>
-                        <small class="subtitle" id="total" style="margin:0;">Total: 0 segundos</small>
+                        <small class="subtitle" id="total" style="margin:0;">Total: 0s</small>
                     </div>
                     <div class="badge" id="best">Mejor: —</div>
                 </div>
@@ -449,6 +441,7 @@
 
         // --- UI ---
         const elDays = document.getElementById("days");
+        const elHours = document.getElementById("hours");
         const elMinutes = document.getElementById("minutes");
         const elSeconds = document.getElementById("seconds");
         const elClock = document.getElementById("clock");
@@ -485,14 +478,13 @@
 
         function normalizeRoomCode(v) {
             v = (v || "").trim().toUpperCase();
-            // permite ABCD-1234 (4 letras, guion, 4 alfanum) pero no forzamos demasiado
             v = v.replace(/[^A-Z0-9-]/g, "");
             return v.slice(0, 12);
         }
 
         function randomRoomCode() {
-            const letters = "ABCDEFGHJKLMNPQRSTUVWXYZ"; // sin I/O para evitar confusión
-            const digits = "23456789"; // sin 0/1
+            const letters = "ABCDEFGHJKLMNPQRSTUVWXYZ";
+            const digits = "23456789";
             const pick = (s, n) => Array.from({ length: n }, () => s[Math.floor(Math.random() * s.length)]).join("");
             return `${pick(letters, 4)}-${pick(digits, 4)}`;
         }
@@ -503,15 +495,6 @@
             } catch {
                 return new Date(ts).toLocaleString();
             }
-        }
-
-        function formatClock(ms) {
-            const totalSec = Math.max(0, Math.floor(ms / 1000));
-            const hh = Math.floor(totalSec / 3600);
-            const mm = Math.floor((totalSec % 3600) / 60);
-            const ss = totalSec % 60;
-            const pad = (n) => String(n).padStart(2, "0");
-            return `${pad(hh)}:${pad(mm)}:${pad(ss)}`;
         }
 
         function compactDuration(ms) {
@@ -547,10 +530,9 @@
 
         // --- Supabase ops ---
         async function ensureRoom(code) {
-            // llama función SQL ensure_room
             const { data, error } = await sb.rpc("ensure_room", { p_room_code: code });
             if (error) throw error;
-            return data; // row de rooms
+            return data;
         }
 
         async function fetchRoom(code) {
@@ -585,7 +567,6 @@
 
             const newStart = now();
 
-            // 1) insert relapse
             const { error: e1 } = await sb.from("relapses").insert({
                 room_id: roomId,
                 at_ms: newStart,
@@ -593,14 +574,12 @@
             });
             if (e1) throw e1;
 
-            // 2) update room start_ms
             const { error: e2 } = await sb
                 .from("rooms")
                 .update({ start_ms: newStart, updated_at: new Date().toISOString() })
                 .eq("id", roomId);
             if (e2) throw e2;
 
-            // local state updates fast (los demás lo verán por polling)
             startMs = newStart;
             lastServerStartMs = newStart;
 
@@ -614,16 +593,23 @@
             const elapsedMs = now() - startMs;
 
             const totalSec = Math.max(0, Math.floor(elapsedMs / 1000));
+
             const days = Math.floor(totalSec / 86400);
-            const minutes = Math.floor(totalSec / 60);
-            const seconds = totalSec;
+            const hoursTotal = Math.floor(totalSec / 3600);           // ✅ horas ACUMULADAS
+            const minutes = Math.floor((totalSec % 3600) / 60);       // 0..59
+            const seconds = totalSec % 60;                            // 0..59
+
+            const pad2 = (n) => String(n).padStart(2, "0");
 
             elDays.textContent = String(days);
-            elMinutes.textContent = String(minutes);
-            elSeconds.textContent = String(seconds);
-            elClock.textContent = formatClock(elapsedMs);
-            elTotal.textContent = `Total: ${seconds} segundos`;
+            elHours.textContent = String(hoursTotal);
+            elMinutes.textContent = pad2(minutes);
+            elSeconds.textContent = pad2(seconds);
 
+            // ✅ reloj grande con horas acumuladas (puede ser 49:12:10)
+            elClock.textContent = `${pad2(hoursTotal)}:${pad2(minutes)}:${pad2(seconds)}`;
+
+            elTotal.textContent = `Total: ${compactDuration(elapsedMs)}`;
             elSince.textContent = `Desde: ${formatSince(startMs)}`;
         }
 
@@ -648,17 +634,14 @@
           `;
                 }).join("");
             }
-            // best: max(duration_ms, current)
             const bestStored = relapses.reduce((m, r) => Math.max(m, Number(r.duration_ms) || 0), 0);
             const current = Number.isFinite(startMs) ? (now() - startMs) : 0;
             elBest.textContent = `Mejor: ${compactDuration(Math.max(bestStored, current))}`;
         }
 
         async function refreshAll() {
-            // 1) fetch room start from server
             const room = await fetchRoom(roomCode);
             if (!room) {
-                // si por alguna razón no existe, créala
                 const created = await ensureRoom(roomCode);
                 roomId = created.id;
                 startMs = Number(created.start_ms);
@@ -667,7 +650,6 @@
                 roomId = room.id;
                 const serverStart = Number(room.start_ms);
                 if (Number.isFinite(serverStart)) {
-                    // detecta cambios por reinicio en otro dispositivo
                     if (lastServerStartMs !== null && serverStart !== lastServerStartMs) {
                         startMs = serverStart;
                         showToast("Se reinició desde otro dispositivo.");
@@ -678,7 +660,6 @@
                 }
             }
 
-            // 2) fetch relapses and render
             const relapses = await fetchRelapses(roomId);
             renderRelapses(relapses);
         }
@@ -690,6 +671,7 @@
                 catch (e) { /* silencioso */ }
             }, 2000);
         }
+
         function stopPolling() {
             if (pollHandle) clearInterval(pollHandle);
             pollHandle = null;
@@ -744,15 +726,12 @@
         });
 
         // --- Boot ---
-        // Si no hay room en URL, NO crear sala automáticamente.
-        // Pedimos que el usuario pegue un código o cree una sala manualmente.
         const params = new URLSearchParams(location.search);
         const urlRoom = normalizeRoomCode(params.get("room") || "");
 
         if (urlRoom) {
             await joinRoom(urlRoom);
         } else {
-            // UI: prepara un código sugerido, pero NO lo crea hasta que den "Entrar"
             const suggested = randomRoomCode();
             roomInput.value = suggested;
             elRoom.textContent = "Room: —";
@@ -760,8 +739,6 @@
             showToast("Pega un código o pulsa Entrar para crear una sala.");
         }
 
-
-        // UI tick local cada segundo (sin tocar servidor)
         setInterval(tick, 1000);
         tick();
     </script>
